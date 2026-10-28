@@ -111,8 +111,8 @@ export default function ReceiptModal({ isOpen, transaction, onClose }) {
 
             {/* Footer Nota */}
             <div className="receipt-footer-greetings">
-              <p>Terima Kasih</p>
-              <p>Semoga Sehat Selalu</p>
+              <p style={{ fontWeight: '600' }}>Terima Kasih</p>
+              <p>{settings.receiptFooter || 'Semoga Lekas Sembuh & Sehat Selalu'}</p>
             </div>
           </div>
         </div>

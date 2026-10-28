@@ -28,7 +28,7 @@ function MainApp() {
     return (
       <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#F8FAFC' }}>
         <div style={{ textAlign: 'center' }}>
-          <div style={{ width: '36px', height: '36px', border: '3px solid #E2E8F0', borderTopColor: '#0066CC', borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto 12px' }} />
+          <div style={{ width: '36px', height: '36px', border: '3px solid #E2E8F0', borderTopColor: 'var(--primary-emerald, #059669)', borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto 12px' }} />
           <div style={{ fontSize: '13px', color: '#64748B', fontWeight: '500' }}>Memuat Sistem Apotek...</div>
         </div>
       </div>

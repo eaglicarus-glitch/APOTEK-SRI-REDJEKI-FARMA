@@ -154,6 +154,32 @@ export default function LoginView() {
             </button>
           </form>
 
+          {/* Quick Demo Credentials Assistant */}
+          <div style={{ marginTop: '16px', padding: '12px 14px', background: '#f8fafc', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', fontSize: '11px', color: 'var(--secondary-text)' }}>
+            <div style={{ fontWeight: '700', color: 'var(--primary-text)', marginBottom: '6px' }}>
+              Pilihan Akun Uji:
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+              <span>Kasir: <code style={{ color: 'var(--primary-text)' }}>kasir</code> / <code style={{ color: 'var(--primary-text)' }}>kasir123</code></span>
+              <button
+                type="button"
+                onClick={() => { setUsername('kasir'); setPassword('kasir123'); }}
+                style={{ background: 'none', border: 'none', color: 'var(--primary-emerald, #059669)', cursor: 'pointer', fontWeight: '700', padding: 0 }}
+              >
+                Gunakan
+              </button>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span>Owner: <code style={{ color: 'var(--primary-text)' }}>owner</code> / <code style={{ color: 'var(--primary-text)' }}>owner123</code></span>
+              <button
+                type="button"
+                onClick={() => { setUsername('owner'); setPassword('owner123'); }}
+                style={{ background: 'none', border: 'none', color: 'var(--primary-emerald, #059669)', cursor: 'pointer', fontWeight: '700', padding: 0 }}
+              >
+                Gunakan
+              </button>
+            </div>
+          </div>
 
           <div className="login-footer-branding">
             <ApotekLogo size={20} />

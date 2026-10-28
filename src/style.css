@@ -4,38 +4,54 @@
    ========================================================================== */
 
 :root {
-  /* Color Palette Sesuai Mockup Referensi */
-  --primary-blue: #0066cc;
-  --active-blue: #0052a3;
-  --light-blue-bg: #eaf2fb;
-  --light-blue-hover: #dbe9f8;
-  
-  --sidebar-navy: #0f2238;
+  /* ==========================================================================
+     PROFESSIONAL PHARMACY EMERALD DESIGN SYSTEM
+     ========================================================================== */
+  --primary-emerald: #059669;
+  --primary-emerald-hover: #047857;
+  --primary-emerald-active: #065f46;
+  --primary-emerald-dark: #064e3b;
+  --light-emerald-bg: #ecfdf5;
+  --light-emerald-hover: #d1fae5;
+  --emerald-border: #a7f3d0;
+
+  /* Backward compatibility aliases */
+  --primary-blue: var(--primary-emerald);
+  --active-blue: var(--primary-emerald-hover);
+  --light-blue-bg: var(--light-emerald-bg);
+  --light-blue-hover: var(--light-emerald-hover);
+
+  --sidebar-navy: #09201a;
   --sidebar-hover: rgba(255, 255, 255, 0.08);
-  --sidebar-active: #0066cc;
-  
-  --page-bg: #f4f6f9;
+  --sidebar-active: #059669;
+
+  --page-bg: #f8fafc;
   --surface: #ffffff;
-  
-  --primary-text: #1e293b;
-  --secondary-text: #64748b;
+  --surface-alt: #f1f5f9;
+
+  --primary-text: #0f172a;
+  --secondary-text: #475569;
   --muted-text: #94a3b8;
-  
+
   --border-color: #e2e8f0;
   --border-light: #f1f5f9;
   --border-dark: #cbd5e1;
-  
+
   --success: #10b981;
   --success-bg: #dcfce7;
   --success-text: #15803d;
-  
+
   --warning: #f59e0b;
-  --warning-bg: #ffedd5;
-  --warning-text: #c2410c;
-  
+  --warning-bg: #fef3c7;
+  --warning-text: #b45309;
+
   --danger: #ef4444;
   --danger-bg: #fee2e2;
   --danger-text: #b91c1c;
+
+  --info: #0284c7;
+  --info-bg: #e0f2fe;
+  --info-text: #0369a1;
 
   --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --radius-sm: 6px;
@@ -651,19 +667,79 @@ p {
   border-radius: var(--radius-md);
   padding: 18px 20px;
   box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.stat-card:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.stat-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.stat-icon-wrapper {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
 .stat-label {
   font-size: 12px;
-  color: #64748b;
-  margin-bottom: 6px;
+  font-weight: 600;
+  color: var(--secondary-text);
 }
 
 .stat-value {
   font-size: 24px;
+  font-weight: 800;
+  color: var(--primary-text);
+  margin-bottom: 6px;
+  letter-spacing: -0.5px;
+}
+
+.stat-footer-text {
+  font-size: 11px;
+  color: var(--secondary-text);
+}
+
+.card-clean-title {
+  font-size: 15px;
   font-weight: 700;
-  color: #0f2238;
-  margin-bottom: 10px;
+  color: var(--primary-text);
+}
+
+.card-clean-subtitle {
+  font-size: 12px;
+  color: var(--secondary-text);
+  margin-top: 2px;
+}
+
+.empty-state-container {
+  padding: 32px 16px;
+  text-align: center;
+}
+
+.dashboard-content-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+@media (max-width: 900px) {
+  .dashboard-content-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .stat-badge {
@@ -1567,7 +1643,7 @@ p {
   font-size: 14px;
   font-weight: 700;
   letter-spacing: 3.5px;
-  color: #0066cc;
+  color: var(--primary-emerald, #059669);
   text-transform: uppercase;
   margin-bottom: 6px;
 }

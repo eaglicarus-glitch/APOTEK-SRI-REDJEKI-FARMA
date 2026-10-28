@@ -14,10 +14,11 @@ export default function SettingsView() {
 
   // Settings Form State
   const [pharmacyName, setPharmacyName] = useState(settings.pharmacyName || 'Apotek Sri Redjeki Farma');
-  const [tagline, setTagline] = useState(settings.tagline || 'Sehat Bersama, Hidup Lebih Baik');
-  const [address, setAddress] = useState(settings.address || 'Jl. Raya No. 123, Kec. Sidoarjo');
+  const [tagline, setTagline] = useState(settings.tagline || 'Pelayanan Ramah, Cepat, dan Terpercaya');
+  const [address, setAddress] = useState(settings.address || 'Jl. Raya Sehat Walafiat No. 88, Jawa Timur');
   const [phone, setPhone] = useState(settings.phone || '0812-3456-7890');
-  const [receiptFooter, setReceiptFooter] = useState(settings.receiptFooter || 'Terima Kasih, Semoga Sehat Selalu');
+  const [receiptFooter, setReceiptFooter] = useState(settings.receiptFooter || 'Semoga Lekas Sembuh & Sehat Selalu');
+  const [isSavingPharmacy, setIsSavingPharmacy] = useState(false);
 
   // Supabase Config State
   const activeConfig = getActiveSupabaseConfig();
@@ -26,8 +27,8 @@ export default function SettingsView() {
   const [testingConnection, setTestingConnection] = useState(false);
   const [statusBadge, setStatusBadge] = useState(() => {
     return isSupabaseConfigured()
-      ? { text: '🟢 Terhubung ke Supabase (Aktif)', bg: '#DCFCE7', color: '#15803D' }
-      : { text: '🟡 Belum Dikonfigurasi', bg: '#FFEDD5', color: '#C2410C' };
+      ? { text: '🟢 Database Supabase PostgreSQL Aktif & Terhubung', bg: '#dcfce7', color: '#15803d' }
+      : { text: '🟡 Belum Dikonfigurasi', bg: '#fef3c7', color: '#b45309' };
   });
 
   const handleSavePharmacy = async (e) => {
@@ -37,6 +38,7 @@ export default function SettingsView() {
       return;
     }
 
+    setIsSavingPharmacy(true);
     const updated = {
       ...settings,
       pharmacyName: pharmacyName.trim(),
@@ -48,9 +50,11 @@ export default function SettingsView() {
 
     try {
       await updatePharmacySettings(updated);
-      showToast('Profil apotek dan pengaturan struk berhasil diperbarui!', 'success');
+      showToast('Profil apotek dan konfigurasi cetak nota berhasil disimpan!', 'success');
     } catch (err) {
       showToast(`Gagal menyimpan pengaturan: ${err.message}`, 'danger');
+    } finally {
+      setIsSavingPharmacy(false);
     }
   };
 
@@ -58,7 +62,7 @@ export default function SettingsView() {
     e.preventDefault();
 
     if (!supabaseUrl.trim() || !supabaseKey.trim()) {
-      showToast('Project URL dan Public Key wajib diisi!', 'warning');
+      showToast('Project URL dan Anon Key Supabase wajib diisi!', 'warning');
       return;
     }
 
@@ -68,13 +72,13 @@ export default function SettingsView() {
     }
 
     resetSupabaseClient(supabaseUrl.trim(), supabaseKey.trim());
-    showToast('Kredensial Supabase disimpan. Menguji koneksi...', 'info');
+    showToast('Kredensial disimpan. Menguji koneksi...', 'info');
     await handleTestConnection();
   };
 
   const handleTestConnection = async () => {
     setTestingConnection(true);
-    setStatusBadge({ text: '🔄 Menguji koneksi...', bg: '#F1F5F9', color: '#1E293B' });
+    setStatusBadge({ text: '🔄 Menguji koneksi...', bg: '#f1f5f9', color: '#1e293b' });
 
     try {
       const client = getSupabaseClient();
@@ -87,19 +91,19 @@ export default function SettingsView() {
       }
 
       setStatusBadge({
-        text: '🟢 Terhubung ke Supabase (Aktif)',
-        bg: '#DCFCE7',
-        color: '#15803D'
+        text: '🟢 Database Supabase PostgreSQL Aktif & Terhubung',
+        bg: '#dcfce7',
+        color: '#15803d'
       });
-      showToast('Sukses! Terhubung ke database PostgreSQL Supabase.', 'success');
+      showToast('Koneksi ke backend Supabase PostgreSQL berhasil diverifikasi!', 'success');
       await loadData();
     } catch (err) {
       setStatusBadge({
-        text: '🔴 Gagal Terhubung: ' + (err.message || 'Error'),
-        bg: '#FEE2E2',
-        color: '#B91C1C'
+        text: '🔴 Gagal Terhubung: ' + (err.message || 'Error koneksi'),
+        bg: '#fee2e2',
+        color: '#b91c1c'
       });
-      showToast('Gagal terhubung ke Supabase: ' + err.message, 'danger');
+      showToast(`Koneksi database gagal: ${err.message}`, 'danger');
     } finally {
       setTestingConnection(false);
     }
@@ -107,27 +111,31 @@ export default function SettingsView() {
 
   return (
     <section id="view-settings" className="view-panel">
-      {/* Header Halaman */}
-      <div className="content-header-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+      {/* Header */}
+      <div className="content-header" style={{ marginBottom: '16px' }}>
         <div>
-          <h1 className="content-title">Pengaturan Sistem Apotek</h1>
+          <h1 className="content-title">Pengaturan Sistem & Apotek</h1>
+          <p style={{ fontSize: '13px', color: 'var(--secondary-text)', marginTop: '2px' }}>
+            Konfigurasi profil resmi apotek, format kop nota belanja, dan koneksi database Supabase
+          </p>
         </div>
       </div>
 
-      {/* 2-Kolom Grid: Profil Apotek & Integrasi Supabase */}
-      <div className="dashboard-two-columns">
-        {/* Kolom Kiri: Profil & Format Struk */}
-        <div className="dashboard-section-card">
-          <div className="card-header-clean">
-            <h3 className="section-card-title">Profil &amp; Identitas Apotek</h3>
-          </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '20px' }}>
+        {/* Form Profil Apotek & Struk */}
+        <div className="card" style={{ padding: '24px' }}>
+          <h3 className="card-clean-title" style={{ marginBottom: '4px' }}>Identitas Resmi Apotek</h3>
+          <p className="card-clean-subtitle" style={{ marginBottom: '20px' }}>
+            Data ini akan dicetak otomatis pada bagian kepala (header) dan kaki (footer) nota belanja kasir
+          </p>
 
-          <form onSubmit={handleSavePharmacy} noValidate>
-            <div className="form-group">
-              <label htmlFor="settings-pharmacy-name">Nama Apotek *</label>
+          <form onSubmit={handleSavePharmacy}>
+            <div className="form-group" style={{ marginBottom: '14px' }}>
+              <label style={{ fontSize: '12px', fontWeight: '600', color: 'var(--primary-text)', marginBottom: '4px', display: 'block' }}>
+                Nama Resmi Apotek *
+              </label>
               <input
                 type="text"
-                id="settings-pharmacy-name"
                 className="form-control"
                 value={pharmacyName}
                 onChange={(e) => setPharmacyName(e.target.value)}
@@ -135,21 +143,23 @@ export default function SettingsView() {
               />
             </div>
 
-            <div className="form-group">
-              <label htmlFor="settings-tagline">Tagline / Slogan</label>
+            <div className="form-group" style={{ marginBottom: '14px' }}>
+              <label style={{ fontSize: '12px', fontWeight: '600', color: 'var(--primary-text)', marginBottom: '4px', display: 'block' }}>
+                Slogan / Tagline
+              </label>
               <input
                 type="text"
-                id="settings-tagline"
                 className="form-control"
                 value={tagline}
                 onChange={(e) => setTagline(e.target.value)}
               />
             </div>
 
-            <div className="form-group">
-              <label htmlFor="settings-address">Alamat Fisik Apotek *</label>
+            <div className="form-group" style={{ marginBottom: '14px' }}>
+              <label style={{ fontSize: '12px', fontWeight: '600', color: 'var(--primary-text)', marginBottom: '4px', display: 'block' }}>
+                Alamat Fisik Apotek *
+              </label>
               <textarea
-                id="settings-address"
                 className="form-control"
                 rows="2"
                 value={address}
@@ -158,102 +168,116 @@ export default function SettingsView() {
               />
             </div>
 
-            <div className="form-group">
-              <label htmlFor="settings-phone">No. Telepon / WhatsApp *</label>
+            <div className="form-group" style={{ marginBottom: '14px' }}>
+              <label style={{ fontSize: '12px', fontWeight: '600', color: 'var(--primary-text)', marginBottom: '4px', display: 'block' }}>
+                Nomor Telepon / Kontak Apotek
+              </label>
               <input
                 type="text"
-                id="settings-phone"
                 className="form-control"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                required
               />
             </div>
 
-            <div className="form-group">
-              <label htmlFor="settings-receipt-footer">Teks Footer Nota Penjualan</label>
-              <textarea
-                id="settings-receipt-footer"
+            <div className="form-group" style={{ marginBottom: '20px' }}>
+              <label style={{ fontSize: '12px', fontWeight: '600', color: 'var(--primary-text)', marginBottom: '4px', display: 'block' }}>
+                Pesan Footer Nota Penjualan
+              </label>
+              <input
+                type="text"
                 className="form-control"
-                rows="2"
                 value={receiptFooter}
+                placeholder="Contoh: Semoga Lekas Sembuh & Sehat Selalu"
                 onChange={(e) => setReceiptFooter(e.target.value)}
               />
             </div>
 
-            <button type="submit" className="btn btn-primary btn-block" style={{ marginTop: '16px' }}>
-              Simpan Profil Apotek
+            <button
+              type="submit"
+              className="btn btn-primary"
+              disabled={isSavingPharmacy}
+              style={{ width: '100%' }}
+            >
+              {isSavingPharmacy ? 'Menyimpan Perubahan...' : 'Simpan Identitas Apotek'}
             </button>
           </form>
         </div>
 
-        {/* Kolom Kanan: Integrasi Database Supabase */}
-        <div className="dashboard-section-card">
-          <div className="card-header-clean">
-            <h3 className="section-card-title">Integrasi Database Supabase</h3>
-            <span
-              style={{
-                fontSize: '11px',
-                fontWeight: '600',
-                padding: '3px 10px',
-                borderRadius: '20px',
-                backgroundColor: statusBadge.bg,
-                color: statusBadge.color
-              }}
+        {/* Koneksi Supabase Backend */}
+        <div className="card" style={{ padding: '24px' }}>
+          <h3 className="card-clean-title" style={{ marginBottom: '4px' }}>Integrasi Cloud Supabase</h3>
+          <p className="card-clean-subtitle" style={{ marginBottom: '16px' }}>
+            Koneksi database PostgreSQL, otentikasi peran staf kasir, dan transaksi atomik
+          </p>
+
+          <div
+            style={{
+              padding: '12px 16px',
+              borderRadius: 'var(--radius-sm)',
+              background: statusBadge.bg,
+              color: statusBadge.color,
+              fontSize: '12px',
+              fontWeight: '600',
+              marginBottom: '20px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between'
+            }}
+          >
+            <span>{statusBadge.text}</span>
+            <button
+              type="button"
+              className="btn btn-sm btn-outline"
+              onClick={handleTestConnection}
+              disabled={testingConnection}
+              style={{ background: '#ffffff', borderColor: 'currentColor', color: 'inherit' }}
             >
-              {statusBadge.text}
-            </span>
+              {testingConnection ? 'Menguji...' : 'Uji Koneksi'}
+            </button>
           </div>
 
-          <form onSubmit={handleSaveSupabaseConfig} noValidate>
-            <div className="form-group">
-              <label htmlFor="settings-supabase-url">Supabase Project URL</label>
+          <form onSubmit={handleSaveSupabaseConfig}>
+            <div className="form-group" style={{ marginBottom: '14px' }}>
+              <label style={{ fontSize: '12px', fontWeight: '600', color: 'var(--primary-text)', marginBottom: '4px', display: 'block' }}>
+                Supabase Project URL
+              </label>
               <input
                 type="text"
-                id="settings-supabase-url"
                 className="form-control"
-                placeholder="https://your-project-id.supabase.co"
                 value={supabaseUrl}
+                placeholder="https://xyz.supabase.co"
                 onChange={(e) => setSupabaseUrl(e.target.value)}
+                required
               />
             </div>
 
-            <div className="form-group">
-              <label htmlFor="settings-supabase-key">Supabase Public / Anon Key</label>
+            <div className="form-group" style={{ marginBottom: '20px' }}>
+              <label style={{ fontSize: '12px', fontWeight: '600', color: 'var(--primary-text)', marginBottom: '4px', display: 'block' }}>
+                Supabase Anon / Publishable Key
+              </label>
               <input
                 type="password"
-                id="settings-supabase-key"
                 className="form-control"
-                placeholder="sb_publishable_... atau eyJhbGciOi..."
                 value={supabaseKey}
+                placeholder="sb_publishable_... atau anon key"
                 onChange={(e) => setSupabaseKey(e.target.value)}
+                required
               />
+              <span style={{ fontSize: '11px', color: 'var(--muted-text)', marginTop: '4px', display: 'block' }}>
+                Key publik aman digunakan di browser client untuk akses terenkripsi via Row Level Security (RLS).
+              </span>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginTop: '16px' }}>
-              <button
-                type="button"
-                className="btn btn-secondary"
-                onClick={handleTestConnection}
-                disabled={testingConnection}
-              >
-                {testingConnection ? 'Menguji...' : 'Uji Koneksi'}
-              </button>
-              <button type="submit" className="btn btn-primary">
-                Simpan Kredensial
-              </button>
-            </div>
+            <button
+              type="submit"
+              className="btn btn-primary"
+              disabled={testingConnection}
+              style={{ width: '100%' }}
+            >
+              Perbarui Kredensial Supabase
+            </button>
           </form>
-
-          {/* Kartu Informasi Konfigurasi Database */}
-          <div style={{ marginTop: '20px', padding: '14px', backgroundColor: '#F8FAFC', borderRadius: '6px', border: '1px solid #E2E8F0', fontSize: '12px' }}>
-            <div style={{ fontWeight: '600', color: '#0F2238', marginBottom: '4px' }}>
-              Informasi PostgreSQL &amp; Migrasi Schema
-            </div>
-            <p style={{ fontSize: '11px', color: '#64748B', lineHeight: '1.5', margin: 0 }}>
-              Database PostgreSQL terpasang dengan Row Level Security (RLS) dan Stored Procedure atomik (<code>process_checkout</code> &amp; <code>adjust_stock</code>). Eksekusi script <code>schema.sql</code> di Supabase SQL Editor untuk sinkronisasi tabel penuh.
-            </p>
-          </div>
         </div>
       </div>
     </section>
