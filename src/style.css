@@ -1559,19 +1559,35 @@ p {
 }
 
 .btn-link-action {
-  background: none;
-  border: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  background-color: #f0f7ff;
+  border: 1px solid #bfdbfe;
   color: var(--primary-blue);
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
-  padding: 2px 4px;
-  transition: var(--transition-fast);
+  padding: 5px 12px;
+  border-radius: var(--radius-sm);
+  transition: all 0.15s ease-in-out;
+  box-shadow: 0 1px 2px rgba(0, 102, 204, 0.06);
+  white-space: nowrap;
 }
 
 .btn-link-action:hover {
-  text-decoration: underline;
-  color: var(--primary-blue-hover);
+  background-color: var(--primary-blue);
+  color: #ffffff;
+  border-color: var(--primary-blue-hover);
+  text-decoration: none;
+  box-shadow: 0 2px 5px rgba(0, 102, 204, 0.25);
+  transform: translateY(-1px);
+}
+
+.btn-link-action:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 2px rgba(0, 102, 204, 0.15);
 }
 
 /* Table Pagination at bottom right */
