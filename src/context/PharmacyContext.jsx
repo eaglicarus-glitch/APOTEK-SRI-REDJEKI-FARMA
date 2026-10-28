@@ -167,6 +167,7 @@ export function PharmacyProvider({ children }) {
             unit: product.unit,
             price: product.price,
             maxStock: product.stock,
+            image: product.image,
             qty: 1,
             subtotal: product.price
           }

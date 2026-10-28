@@ -230,49 +230,73 @@ export default function PosView() {
                 <span>Pilih obat di katalog untuk menambahkan</span>
               </div>
             ) : (
-              cart.map((item) => (
-                <div key={item.id} className="pos-cart-item-row">
-                  <div className="cart-item-thumb">
-                    {item.image ? (
-                      <img src={item.image} alt={item.name} />
-                    ) : (
-                      <div className="cart-thumb-box">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0066CC" strokeWidth="2">
-                          <rect x="3" y="3" width="18" height="18" rx="4" />
-                          <path d="M8 12h8" />
-                        </svg>
+              cart.map((item) => {
+                const itemProduct = products.find((p) => p.id === item.id);
+                const itemImage = item.image || itemProduct?.image;
+                return (
+                  <div key={item.id} className="pos-cart-item-row">
+                    <div className="cart-item-thumb">
+                      {itemImage ? (
+                        <img src={itemImage} alt={item.name} />
+                      ) : (
+                        <div className="cart-thumb-box">
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0066CC" strokeWidth="1.8">
+                            <path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z" />
+                            <path d="m8.5 8.5 7 7" />
+                          </svg>
+                        </div>
+                      )}
+                    </div>
+                    <div className="cart-item-info">
+                      <div className="cart-item-name" title={item.name}>{item.name}</div>
+                      <div className="cart-item-math">
+                        <span className="cart-item-qty-actions">
+                          <button
+                            type="button"
+                            onClick={() => updateCartQty(item.id, -1)}
+                            title="Kurang"
+                            aria-label="Kurangi kuantitas"
+                          >
+                            -
+                          </button>
+                          <input
+                            type="number"
+                            value={item.qty}
+                            min="1"
+                            onChange={(e) => setCartQty(item.id, e.target.value)}
+                            aria-label="Jumlah pesanan"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => updateCartQty(item.id, 1)}
+                            title="Tambah"
+                            aria-label="Tambah kuantitas"
+                          >
+                            +
+                          </button>
+                        </span>
                       </div>
-                    )}
-                  </div>
-                  <div className="cart-item-info">
-                    <div className="cart-item-name">{item.name}</div>
-                    <div className="cart-item-math">
-                      <span className="cart-item-qty-actions">
-                        <button type="button" onClick={() => updateCartQty(item.id, -1)}>-</button>
-                        <input
-                          type="number"
-                          value={item.qty}
-                          min="1"
-                          onChange={(e) => setCartQty(item.id, e.target.value)}
-                        />
-                        <button type="button" onClick={() => updateCartQty(item.id, 1)}>+</button>
-                      </span>
-                      <span className="cart-item-unit-price">x {formatRupiah(item.price)}</span>
+                    </div>
+                    <div className="cart-item-subtotal">
+                      <span className="cart-item-price-val">{formatRupiah(item.subtotal)}</span>
+                      <button
+                        type="button"
+                        className="btn-remove-item"
+                        onClick={() => removeFromCart(item.id)}
+                        title="Hapus pesanan"
+                        aria-label="Hapus pesanan"
+                      >
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <polyline points="3 6 5 6 21 6" />
+                          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                          <line x1="10" y1="11" x2="10" y2="17" />
+                          <line x1="14" y1="11" x2="14" y2="17" />
+                        </svg>
+                      </button>
                     </div>
                   </div>
-                  <div className="cart-item-subtotal">
-                    {formatRupiah(item.subtotal)}
-                    <button
-                      type="button"
-                      className="btn-remove-item"
-                      onClick={() => removeFromCart(item.id)}
-                      title="Hapus"
-                    >
-                      &times;
-                    </button>
-                  </div>
-                </div>
-              ))
+                );
+              })
             )}
           </div>
 
