@@ -16,9 +16,9 @@ export default function ApotekLogo({ size = 36, showText = false, textColor = '#
             <stop stopColor="#10B981" />
             <stop offset="1" stopColor="#059669" />
           </linearGradient>
-          <linearGradient id="logoTeal" x1="12" y1="12" x2="44" y2="44" gradientUnits="userSpaceOnUse">
-            <stop stopColor="#14B8A6" />
-            <stop offset="1" stopColor="#0D9488" />
+          <linearGradient id="logoBlue" x1="12" y1="12" x2="44" y2="44" gradientUnits="userSpaceOnUse">
+            <stop stopColor="#0284C7" />
+            <stop offset="1" stopColor="#0066CC" />
           </linearGradient>
           <filter id="logoShadow" x="-15%" y="-15%" width="130%" height="130%" filterUnits="userSpaceOnUse">
             <feDropShadow dx="0" dy="2" stdDeviation="2.5" floodColor="#0F2238" floodOpacity="0.08" />
@@ -32,7 +32,7 @@ export default function ApotekLogo({ size = 36, showText = false, textColor = '#
           <path
             d="M 12 36 A 18 18 0 1 0 38 12"
             fill="none"
-            stroke="url(#logoTeal)"
+            stroke="url(#logoBlue)"
             strokeWidth="3.5"
             strokeLinecap="round"
           />
@@ -43,7 +43,7 @@ export default function ApotekLogo({ size = 36, showText = false, textColor = '#
 
       {showText && (
         <div style={{ lineHeight: 1.2 }}>
-          <div style={{ color: 'var(--primary-emerald, #059669)', fontWeight: 800, fontSize: size > 40 ? '12px' : '10px', letterSpacing: '2.5px', textTransform: 'uppercase' }}>
+          <div style={{ color: '#0066CC', fontWeight: 800, fontSize: size > 40 ? '12px' : '10px', letterSpacing: '2.5px', textTransform: 'uppercase' }}>
             APOTEK
           </div>
           <div style={{ color: textColor, fontWeight: 700, fontSize: size > 40 ? '17px' : '14px', letterSpacing: '0.3px' }}>

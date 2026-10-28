@@ -6,7 +6,7 @@ import { formatRupiah, formatDateTime, getLocalDateString } from '../lib/constan
 export default function ReportsView() {
   const { transactions } = usePharmacy();
   const { showToast } = useToast();
-  const [period, setPeriod] = useState('month'); // 'today' | 'week' | 'month' | 'all'
+  const [period, setPeriod] = useState('today'); // 'today' | 'week' | 'month' | 'all'
 
   const todayStr = useMemo(() => getLocalDateString(new Date()), []);
 
@@ -27,15 +27,16 @@ export default function ReportsView() {
     return transactions;
   }, [transactions, period, todayStr]);
 
-  // Metrik Penjualan Utama
+  // Metrik Penjualan
   const totalRevenue = filteredTx.reduce((sum, tx) => sum + (Number(tx.total) || 0), 0);
   const totalTransactions = filteredTx.length;
   const totalItemsSold = filteredTx.reduce((sum, tx) => {
     return sum + (tx.items ? tx.items.reduce((s, it) => s + (Number(it.qty) || 0), 0) : 0);
   }, 0);
+  const totalDiscount = filteredTx.reduce((sum, tx) => sum + (Number(tx.discount) || 0), 0);
   const avgBasket = totalTransactions > 0 ? Math.round(totalRevenue / totalTransactions) : 0;
 
-  // Analisis Obat Terlaris (Top Selling)
+  // Analisis Obat Terlaris
   const topSellingList = useMemo(() => {
     const itemMap = {};
     filteredTx.forEach((tx) => {
@@ -43,7 +44,7 @@ export default function ReportsView() {
         tx.items.forEach((it) => {
           const key = it.code || it.name;
           if (!itemMap[key]) {
-            itemMap[key] = { name: it.name, code: it.code, unit: it.unit || 'Strip', qty: 0, revenue: 0 };
+            itemMap[key] = { name: it.name, unit: it.unit || 'Strip', qty: 0, revenue: 0 };
           }
           itemMap[key].qty += Number(it.qty) || 0;
           itemMap[key].revenue += Number(it.subtotal) || 0;
@@ -51,12 +52,12 @@ export default function ReportsView() {
       }
     });
 
-    return Object.values(itemMap).sort((a, b) => b.qty - a.qty).slice(0, 5);
+    return Object.values(itemMap).sort((a, b) => b.qty - a.qty).slice(0, 6);
   }, [filteredTx]);
 
-  // Metode Pembayaran
+  // Distribusi Metode Pembayaran
   const paymentBreakdown = useMemo(() => {
-    const counts = { Tunai: 0, QRIS: 0, Transfer: 0, Debit: 0 };
+    const counts = { Tunai: 0, Debit: 0, QRIS: 0 };
     filteredTx.forEach((tx) => {
       const method = tx.paymentMethod || 'Tunai';
       if (counts[method] !== undefined) {
@@ -68,7 +69,7 @@ export default function ReportsView() {
     return counts;
   }, [filteredTx]);
 
-  const paymentSum = (paymentBreakdown.Tunai + paymentBreakdown.QRIS + paymentBreakdown.Transfer + paymentBreakdown.Debit) || 1;
+  const paymentSum = (paymentBreakdown.Tunai + paymentBreakdown.Debit + paymentBreakdown.QRIS) || 1;
 
   // Tren Penjualan 7 Hari Terakhir
   const last7DaysData = useMemo(() => {
@@ -87,28 +88,24 @@ export default function ReportsView() {
     return days;
   }, [transactions]);
 
-  const maxSales = Math.max(...last7DaysData.map((d) => d.sales), 100000);
-
   // Ekspor CSV
   const handleExportCSV = () => {
     if (filteredTx.length === 0) {
-      showToast('Tidak ada data transaksi pada periode ini untuk diekspor!', 'warning');
+      showToast('Tidak ada data transaksi untuk diekspor!', 'warning');
       return;
     }
 
-    const headers = ['Kode Faktur', 'Tanggal Jam', 'Pelanggan', 'Metode Pembayaran', 'Subtotal', 'Diskon', 'Total (Rp)', 'Kasir', 'Detail Item'];
+    const headers = ['Kode Transaksi', 'Tanggal', 'Pelanggan', 'Metode Pembayaran', 'Total (Rp)', 'Kasir', 'Item Detail'];
     const rows = filteredTx.map((tx) => {
-      const itemsStr = tx.items ? tx.items.map((it) => `${it.name} (${it.qty} ${it.unit || 'unit'})`).join('; ') : '-';
+      const itemsStr = tx.items ? tx.items.map((it) => `${it.name} x${it.qty}`).join('; ') : '';
       return [
         `"${tx.code}"`,
         `"${formatDateTime(tx.dateTime)}"`,
-        `"${tx.customer || 'Pelanggan Umum'}"`,
-        `"${tx.paymentMethod || 'Tunai'}"`,
-        tx.subtotal,
-        tx.discount || 0,
+        `"${(tx.customer || '').replace(/"/g, '""')}"`,
+        `"${tx.paymentMethod}"`,
         tx.total,
-        `"${tx.cashier || 'Kasir'}"`,
-        `"${itemsStr}"`
+        `"${tx.cashier || ''}"`,
+        `"${itemsStr.replace(/"/g, '""')}"`
       ].join(',');
     });
 
@@ -116,161 +113,191 @@ export default function ReportsView() {
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement('a');
     link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `Laporan_Penjualan_Apotek_${period}_${todayStr}.csv`);
+    link.setAttribute('download', `Laporan_Apotek_Sri_Redjeki_${period}_${todayStr}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
 
-    showToast('Laporan penjualan CSV berhasil diunduh.', 'success');
+    showToast('Laporan CSV berhasil diunduh.', 'success');
   };
 
   return (
     <section id="view-reports" className="view-panel">
-      {/* Header */}
-      <div className="content-header" style={{ marginBottom: '16px' }}>
+      {/* Header Halaman */}
+      <div className="content-header-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
         <div>
-          <h1 className="content-title">Laporan & Analitik Penjualan</h1>
-          <p style={{ fontSize: '13px', color: 'var(--secondary-text)', marginTop: '2px' }}>
-            Rekapitulasi pendapatan apotek, tren penjualan harian, dan analisis produk terlaris
-          </p>
+          <h1 className="content-title">Laporan Penjualan &amp; Keuangan</h1>
         </div>
         <div style={{ display: 'flex', gap: '8px' }}>
-          <button
-            type="button"
-            className="btn btn-primary"
-            onClick={handleExportCSV}
-            style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <button type="button" className="btn btn-secondary" onClick={handleExportCSV}>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-              <polyline points="7 10 12 15 17 10" />
-              <line x1="12" y1="15" x2="12" y2="3" />
+              <polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" />
             </svg>
-            Ekspor Laporan (CSV)
+            <span>Ekspor CSV</span>
+          </button>
+          <button type="button" className="btn btn-primary" onClick={() => window.print()}>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <polyline points="6 9 6 2 18 2 18 9" />
+              <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+              <rect x="6" y="14" width="12" height="8" />
+            </svg>
+            <span>Cetak Laporan</span>
           </button>
         </div>
       </div>
 
-      {/* Filter Periode */}
-      <div className="card" style={{ padding: '14px 20px', marginBottom: '20px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ fontSize: '12px', fontWeight: '600', color: 'var(--primary-text)' }}>
-              Periode Waktu:
-            </span>
-            {[
-              { id: 'today', label: 'Hari Ini' },
-              { id: 'week', label: '7 Hari Terakhir' },
-              { id: 'month', label: 'Bulan Ini' },
-              { id: 'all', label: 'Semua Riwayat' }
-            ].map((p) => (
-              <button
-                key={p.id}
-                type="button"
-                className={`btn btn-sm ${period === p.id ? 'btn-primary' : 'btn-outline'}`}
-                onClick={() => setPeriod(p.id)}
-              >
-                {p.label}
-              </button>
-            ))}
-          </div>
-
-          <div style={{ fontSize: '12px', color: 'var(--secondary-text)' }}>
-            Data dihitung dari <strong>{filteredTx.length}</strong> transaksi resmi.
-          </div>
-        </div>
+      {/* Periode Filter Pills */}
+      <div className="category-pills-bar" style={{ marginBottom: '18px' }}>
+        <button
+          type="button"
+          className={`category-pill ${period === 'today' ? 'active' : ''}`}
+          onClick={() => setPeriod('today')}
+        >
+          Hari Ini
+        </button>
+        <button
+          type="button"
+          className={`category-pill ${period === 'week' ? 'active' : ''}`}
+          onClick={() => setPeriod('week')}
+        >
+          7 Hari Terakhir
+        </button>
+        <button
+          type="button"
+          className={`category-pill ${period === 'month' ? 'active' : ''}`}
+          onClick={() => setPeriod('month')}
+        >
+          Bulan Ini
+        </button>
+        <button
+          type="button"
+          className={`category-pill ${period === 'all' ? 'active' : ''}`}
+          onClick={() => setPeriod('all')}
+        >
+          Semua Riwayat
+        </button>
       </div>
 
-      {/* 4 Kartu Metrik Laporan */}
-      <div className="dashboard-stats-grid" style={{ marginBottom: '24px' }}>
+      {/* Metrics Cards Grid (4 Kolom Sesuai Desain Modern) */}
+      <div className="dashboard-stats-grid" style={{ gridTemplateColumns: 'repeat(4, 1fr)', marginBottom: '20px' }}>
         <div className="stat-card">
-          <span className="stat-label">Total Omset Pendapatan</span>
-          <div className="stat-value" style={{ color: 'var(--primary-emerald, #059669)' }}>{formatRupiah(totalRevenue)}</div>
-          <span style={{ fontSize: '11px', color: 'var(--secondary-text)' }}>Total pendapatan kotor bersih</span>
+          <div className="stat-label">Total Omzet Penjualan</div>
+          <div className="stat-value" style={{ color: 'var(--primary-blue)' }}>{formatRupiah(totalRevenue)}</div>
+          <div className="stat-badge stat-badge-positive">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <polyline points="18 15 12 9 6 15" />
+            </svg>
+            <span>{totalTransactions} Transaksi</span>
+          </div>
         </div>
 
         <div className="stat-card">
-          <span className="stat-label">Jumlah Faktur Penjualan</span>
+          <div className="stat-label">Jumlah Transaksi</div>
           <div className="stat-value">{totalTransactions}</div>
-          <span style={{ fontSize: '11px', color: 'var(--secondary-text)' }}>Total nota kasir tercatat</span>
-        </div>
-
-        <div className="stat-card">
-          <span className="stat-label">Total Kuantitas Obat Terjual</span>
-          <div className="stat-value">{totalItemsSold} <span style={{ fontSize: '14px', color: 'var(--secondary-text)' }}>unit</span></div>
-          <span style={{ fontSize: '11px', color: 'var(--secondary-text)' }}>Akumulasi fisik obat keluar</span>
-        </div>
-
-        <div className="stat-card">
-          <span className="stat-label">Rata-rata Nilai Transaksi</span>
-          <div className="stat-value">{formatRupiah(avgBasket)}</div>
-          <span style={{ fontSize: '11px', color: 'var(--secondary-text)' }}>Rata-rata belanja per nota</span>
-        </div>
-      </div>
-
-      {/* Grafik Tren 7 Hari Terakhir & Distribusi Pembayaran */}
-      <div className="dashboard-content-grid" style={{ marginBottom: '24px' }}>
-        {/* Grafik Penjualan 7 Hari */}
-        <div className="card" style={{ padding: '20px' }}>
-          <h3 className="card-clean-title" style={{ marginBottom: '4px' }}>Tren Penjualan 7 Hari Terakhir</h3>
-          <p className="card-clean-subtitle" style={{ marginBottom: '20px' }}>Grafik fluktuasi omset penjualan harian</p>
-
-          <div style={{ height: '180px', display: 'flex', alignItems: 'flex-end', gap: '12px', paddingBottom: '24px', borderBottom: '1px solid var(--border-color)' }}>
-            {last7DaysData.map((d) => {
-              const heightPercent = Math.max(8, Math.round((d.sales / maxSales) * 100));
-              return (
-                <div key={d.date} style={{ flex: '1', display: 'flex', flexDirection: 'column', alignItems: 'center', height: '100%', justifyContent: 'flex-end' }}>
-                  <div
-                    style={{
-                      fontSize: '10px',
-                      fontWeight: '700',
-                      color: d.sales > 0 ? 'var(--primary-emerald, #059669)' : 'var(--muted-text)',
-                      marginBottom: '4px'
-                    }}
-                  >
-                    {d.sales > 0 ? `${Math.round(d.sales / 1000)}k` : '0'}
-                  </div>
-                  <div
-                    style={{
-                      width: '100%',
-                      maxWidth: '36px',
-                      height: `${heightPercent}%`,
-                      background: d.sales > 0 ? 'var(--primary-emerald, #059669)' : '#e2e8f0',
-                      borderRadius: '4px 4px 0 0',
-                      transition: 'height 0.3s ease'
-                    }}
-                    title={`${d.label} (${d.date}): ${formatRupiah(d.sales)}`}
-                  />
-                  <div style={{ fontSize: '11px', fontWeight: '600', color: 'var(--secondary-text)', marginTop: '8px' }}>
-                    {d.label}
-                  </div>
-                </div>
-              );
-            })}
+          <div className="stat-badge stat-badge-positive">
+            <span>Selesai diproses</span>
           </div>
         </div>
 
-        {/* Distribusi Metode Pembayaran */}
-        <div className="card" style={{ padding: '20px' }}>
-          <h3 className="card-clean-title" style={{ marginBottom: '4px' }}>Distribusi Metode Pembayaran</h3>
-          <p className="card-clean-subtitle" style={{ marginBottom: '20px' }}>Persentase perolehan kas berdasarkan kanal</p>
+        <div className="stat-card">
+          <div className="stat-label">Total Item Terjual</div>
+          <div className="stat-value">{totalItemsSold}</div>
+          <div className="stat-badge stat-badge-positive">
+            <span>Unit obat</span>
+          </div>
+        </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-            {['Tunai', 'QRIS', 'Transfer', 'Debit'].map((m) => {
-              const amount = paymentBreakdown[m] || 0;
-              const percent = Math.round((amount / paymentSum) * 100);
+        <div className="stat-card">
+          <div className="stat-label">Total Potongan Diskon</div>
+          <div className="stat-value text-danger">{formatRupiah(totalDiscount)}</div>
+          <div className="stat-badge" style={{ backgroundColor: '#FEE2E2', color: '#B91C1C' }}>
+            <span>Rata-rata: {formatRupiah(avgBasket)} / trx</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Visual Analytics 2-Kolom: Tren Penjualan & Distribusi Metode Bayar */}
+      <div className="dashboard-two-columns" style={{ marginBottom: '20px' }}>
+        {/* Kolom Kiri: Tren Penjualan 7 Hari Terakhir */}
+        <div className="dashboard-section-card">
+          <div className="card-header-clean">
+            <h3 className="section-card-title">Tren Penjualan 7 Hari Terakhir</h3>
+          </div>
+          <div style={{ width: '100%', height: '210px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            {(() => {
+              const maxSale = Math.max(...last7DaysData.map((d) => d.sales), 100000);
+              const chartHeight = 140;
+              const barWidth = 32;
+              const gap = 20;
+              const totalWidth = 7 * barWidth + 6 * gap;
+
               return (
-                <div key={m}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', marginBottom: '4px' }}>
-                    <span style={{ fontWeight: '600', color: 'var(--primary-text)' }}>{m}</span>
-                    <span style={{ fontWeight: '700', color: 'var(--primary-emerald, #059669)' }}>{formatRupiah(amount)} ({percent}%)</span>
+                <svg viewBox={`0 0 ${totalWidth} 190`} style={{ width: '100%', height: '100%', overflow: 'visible' }}>
+                  {last7DaysData.map((day, idx) => {
+                    const x = idx * (barWidth + gap);
+                    const h = Math.max(8, Math.round((day.sales / maxSale) * chartHeight));
+                    const y = 155 - h;
+
+                    return (
+                      <g key={day.date} className="chart-bar-group">
+                        <title>{`${day.label} (${day.date}): ${formatRupiah(day.sales)}`}</title>
+                        <rect
+                          x={x}
+                          y={y}
+                          width={barWidth}
+                          height={h}
+                          rx={5}
+                          fill={day.sales > 0 ? '#0066CC' : '#E2E8F0'}
+                          style={{ transition: 'all 0.3s ease' }}
+                        />
+                        <text
+                          x={x + barWidth / 2}
+                          y="175"
+                          textAnchor="middle"
+                          fill="#64748B"
+                          fontSize="11"
+                          fontWeight="500"
+                        >
+                          {day.label}
+                        </text>
+                      </g>
+                    );
+                  })}
+                </svg>
+              );
+            })()}
+          </div>
+        </div>
+
+        {/* Kolom Kanan: Distribusi Metode Pembayaran */}
+        <div className="dashboard-section-card">
+          <div className="card-header-clean">
+            <h3 className="section-card-title">Distribusi Metode Pembayaran</h3>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', padding: '8px 0' }}>
+            {[
+              { label: 'Tunai (Cash)', count: paymentBreakdown.Tunai, color: '#0066CC' },
+              { label: 'Debit Card', count: paymentBreakdown.Debit, color: '#10B981' },
+              { label: 'QRIS', count: paymentBreakdown.QRIS, color: '#F59E0B' }
+            ].map((m) => {
+              const pct = Math.round((m.count / paymentSum) * 100);
+              return (
+                <div key={m.label}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', marginBottom: '6px' }}>
+                    <span style={{ fontWeight: '600', color: '#1E293B' }}>{m.label}</span>
+                    <span style={{ color: '#64748B' }}>
+                      {formatRupiah(m.count)} ({pct}%)
+                    </span>
                   </div>
-                  <div style={{ height: '8px', background: '#e2e8f0', borderRadius: '4px', overflow: 'hidden' }}>
+                  <div style={{ width: '100%', height: '8px', background: '#F1F5F9', borderRadius: '4px', overflow: 'hidden' }}>
                     <div
                       style={{
+                        width: `${pct}%`,
                         height: '100%',
-                        width: `${percent}%`,
-                        background: m === 'Tunai' ? 'var(--primary-emerald, #059669)' : m === 'QRIS' ? '#0284c7' : m === 'Transfer' ? '#f59e0b' : '#8b5cf6'
+                        background: m.color,
+                        borderRadius: '4px',
+                        transition: 'width 0.4s ease'
                       }}
                     />
                   </div>
@@ -281,46 +308,42 @@ export default function ReportsView() {
         </div>
       </div>
 
-      {/* Tabel Obat Terlaris */}
-      <div className="card">
-        <div className="card-header-clean">
-          <div>
-            <h3 className="card-clean-title">5 Obat Paling Laris (Top Selling)</h3>
-            <p className="card-clean-subtitle">Berdasarkan volume penjualan pada periode {period === 'today' ? 'hari ini' : period === 'week' ? '7 hari terakhir' : period === 'month' ? 'bulan ini' : 'seluruh waktu'}</p>
-          </div>
+      {/* Tabel Produk Paling Laris */}
+      <div className="card table-card-clean">
+        <div className="card-header-clean" style={{ padding: '14px 18px', margin: 0, borderBottom: '1px solid #F1F5F9' }}>
+          <h3 className="section-card-title">Obat Paling Laris Terjual (Top Products)</h3>
         </div>
-
         <div className="table-responsive">
           <table className="data-table">
             <thead>
               <tr>
-                <th style={{ width: '40px' }}>No</th>
-                <th>Kode Obat</th>
-                <th>Nama Produk Obat</th>
+                <th style={{ width: '50px' }}>No</th>
+                <th>Nama Obat</th>
+                <th>Satuan</th>
                 <th style={{ textAlign: 'center' }}>Total Terjual</th>
-                <th style={{ textAlign: 'right' }}>Total Kontribusi Omset</th>
+                <th style={{ textAlign: 'right' }}>Total Omzet</th>
+                <th style={{ textAlign: 'center' }}>Status</th>
               </tr>
             </thead>
             <tbody>
               {topSellingList.length === 0 ? (
                 <tr>
-                  <td colSpan="5" className="table-empty-row">
-                    <div className="empty-state-container">
-                      <p style={{ fontWeight: '600', color: 'var(--primary-text)' }}>Belum ada data penjualan pada periode ini.</p>
-                    </div>
+                  <td colSpan="6" className="text-center text-muted" style={{ padding: '24px' }}>
+                    Belum ada data penjualan pada periode ini.
                   </td>
                 </tr>
               ) : (
                 topSellingList.map((item, idx) => (
-                  <tr key={item.code || idx}>
-                    <td style={{ color: 'var(--muted-text)' }}>{idx + 1}</td>
-                    <td style={{ fontWeight: '600' }}>{item.code || '-'}</td>
-                    <td style={{ fontWeight: '600', color: 'var(--primary-text)' }}>{item.name}</td>
-                    <td style={{ textAlign: 'center', fontWeight: '800', color: 'var(--primary-emerald, #059669)' }}>
-                      {item.qty} {item.unit}
-                    </td>
-                    <td style={{ textAlign: 'right', fontWeight: '700' }}>
-                      {formatRupiah(item.revenue)}
+                  <tr key={item.name}>
+                    <td>{idx + 1}</td>
+                    <td className="fw-medium">{item.name}</td>
+                    <td>{item.unit}</td>
+                    <td style={{ textAlign: 'center' }} className="fw-bold">{item.qty} {item.unit}</td>
+                    <td style={{ textAlign: 'right' }} className="fw-bold text-primary">{formatRupiah(item.revenue)}</td>
+                    <td style={{ textAlign: 'center' }}>
+                      <span className="badge-pill badge-pill-success">
+                        Terlaris #{idx + 1}
+                      </span>
                     </td>
                   </tr>
                 ))
