@@ -20,7 +20,7 @@ export default function MedicinesView() {
   // Form Fields
   const [code, setCode] = useState('');
   const [name, setName] = useState('');
-  const [category, setCategory] = useState('Obat Bebas');
+  const [category, setCategory] = useState('Tablet');
   const [unit, setUnit] = useState('Strip');
   const [price, setPrice] = useState('');
   const [stock, setStock] = useState('');
@@ -31,30 +31,14 @@ export default function MedicinesView() {
   // Delete Confirm State
   const [deleteTarget, setDeleteTarget] = useState(null);
 
-  // Kategori dinamis sesuai database dan standar apotek
-  const categories = React.useMemo(() => {
-    const standardCats = [
-      'Obat Bebas',
-      'Obat Bebas Terbatas',
-      'Obat Keras',
-      'Obat Luar',
-      'Vitamin & Suplemen',
-      'Alat Kesehatan',
-      'Herbal & Jamu'
-    ];
-    const productCats = products
-      .map((p) => p.category)
-      .filter((c) => c && typeof c === 'string' && c.trim() !== '');
-
-    const set = new Set(['Semua', ...standardCats, ...productCats]);
-    return Array.from(set);
-  }, [products]);
+  // Kategori sesuai mockup
+  const categories = ['Semua', 'Tablet', 'Kapsul', 'Sirup', 'Salep', 'Lainnya'];
 
   const filtered = products.filter((p) => {
     const matchCat =
       selectedCategory === 'Semua' ||
       (selectedCategory === 'Lainnya'
-        ? !categories.filter((c) => c !== 'Semua' && c !== 'Lainnya').includes(p.category)
+        ? !['Tablet', 'Kapsul', 'Sirup', 'Salep'].includes(p.category)
         : p.category === selectedCategory);
 
     const q = searchQuery.toLowerCase().trim();
@@ -73,7 +57,7 @@ export default function MedicinesView() {
     }
     setCode(`OBT${String(seq).padStart(3, '0')}`);
     setName('');
-    setCategory('Obat Bebas');
+    setCategory('Tablet');
     setUnit('Strip');
     setPrice('');
     setStock('');
@@ -341,13 +325,10 @@ export default function MedicinesView() {
                         onChange={(e) => setCategory(e.target.value)}
                         required
                       >
-                        <option value="Obat Bebas">Obat Bebas</option>
-                        <option value="Obat Bebas Terbatas">Obat Bebas Terbatas</option>
-                        <option value="Obat Keras">Obat Keras</option>
-                        <option value="Obat Luar">Obat Luar</option>
-                        <option value="Vitamin & Suplemen">Vitamin &amp; Suplemen</option>
-                        <option value="Alat Kesehatan">Alat Kesehatan</option>
-                        <option value="Herbal & Jamu">Herbal &amp; Jamu</option>
+                        <option value="Tablet">Tablet</option>
+                        <option value="Kapsul">Kapsul</option>
+                        <option value="Sirup">Sirup</option>
+                        <option value="Salep">Salep</option>
                         <option value="Lainnya">Lainnya</option>
                       </select>
                     </div>

@@ -43,31 +43,15 @@ export default function PosView() {
   const [lastTransaction, setLastTransaction] = useState(null);
   const [isReceiptOpen, setIsReceiptOpen] = useState(false);
 
-  // Kategori dinamis sesuai database dan standar apotek
-  const categories = useMemo(() => {
-    const standardCats = [
-      'Obat Bebas',
-      'Obat Bebas Terbatas',
-      'Obat Keras',
-      'Obat Luar',
-      'Vitamin & Suplemen',
-      'Alat Kesehatan',
-      'Herbal & Jamu'
-    ];
-    const productCats = products
-      .map((p) => p.category)
-      .filter((c) => c && typeof c === 'string' && c.trim() !== '');
-
-    const set = new Set(['Semua', ...standardCats, ...productCats]);
-    return Array.from(set);
-  }, [products]);
+  // Kategori sesuai mockup
+  const categories = ['Semua', 'Tablet', 'Kapsul', 'Sirup', 'Salep', 'Lainnya'];
 
   // Filter katalog produk
   const filteredProducts = products.filter((p) => {
     const matchCat =
       selectedCategory === 'Semua' ||
       (selectedCategory === 'Lainnya'
-        ? !categories.filter((c) => c !== 'Semua' && c !== 'Lainnya').includes(p.category)
+        ? !['Tablet', 'Kapsul', 'Sirup', 'Salep'].includes(p.category)
         : p.category === selectedCategory);
 
     const q = searchQuery.toLowerCase().trim();

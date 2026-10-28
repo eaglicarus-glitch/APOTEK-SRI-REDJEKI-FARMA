@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { getSupabaseClient, isSupabaseConfigured } from '../lib/supabaseClient';
-import { STORAGE_KEY, DEFAULT_SETTINGS, INITIAL_PRODUCTS, getLocalDateString } from '../lib/constants';
+import { STORAGE_KEY, DEFAULT_SETTINGS, INITIAL_PRODUCTS, getLocalDateString, normalizeMedicineCategory } from '../lib/constants';
 
 const PharmacyContext = createContext(null);
 
@@ -50,7 +50,7 @@ export function PharmacyProvider({ children }) {
             id: m.id,
             code: m.code,
             name: m.name,
-            category: m.category,
+            category: normalizeMedicineCategory(m.category, m.name, m.unit),
             unit: m.unit,
             price: Number(m.price),
             stock: Number(m.stock),
