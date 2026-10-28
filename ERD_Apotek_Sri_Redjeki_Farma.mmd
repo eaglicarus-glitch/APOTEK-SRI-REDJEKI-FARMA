@@ -1,0 +1,96 @@
+erDiagram
+    %% ==============================================================================
+    %% ENTITY RELATIONSHIP DIAGRAM (ERD AKTUAL)
+    %% APOTEK SRI REDJEKI FARMA — DATABASE SUPABASE (POSTGRESQL)
+    %% ==============================================================================
+
+    auth_users ||--|| profiles : "extends 1:1 via id"
+    profiles ||--o{ transactions : "cashier_id (creates)"
+    profiles ||--o{ stock_movements : "operator_id (adjusts)"
+    transactions ||--|{ transaction_items : "transaction_id (has)"
+    medicines ||--o{ transaction_items : "medicine_id (referenced in)"
+    medicines ||--o{ stock_movements : "medicine_id (logs stock change)"
+
+    auth_users {
+        UUID id PK "Internal Supabase Auth ID"
+        VARCHAR email "Email unik pengguna"
+        TIMESTAMPTZ created_at "Waktu registrasi akun"
+    }
+
+    profiles {
+        UUID id PK,FK "References auth.users(id) ON DELETE CASCADE"
+        VARCHAR username UK "Username login unik"
+        VARCHAR full_name "Nama lengkap staf / apoteker"
+        user_role role "Enum: Kasir | Apoteker / Owner"
+        TIMESTAMPTZ created_at "Timestamp pembuatan profil"
+        TIMESTAMPTZ updated_at "Timestamp pembaruan profil"
+    }
+
+    medicines {
+        UUID id PK "Primary Key (uuid_generate_v4)"
+        VARCHAR code UK "Kode unik obat (contoh: MED-001)"
+        VARCHAR name "Nama merek atau generik obat"
+        VARCHAR category "Kategori obat (Tablet, Kapsul, dll)"
+        VARCHAR unit "Satuan terkecil jual (Strip, Botol, Tube)"
+        NUMERIC price "Harga jual per satuan (>= 0)"
+        INTEGER stock "Jumlah stok fisik saat ini (>= 0)"
+        INTEGER min_stock "Batas minimum peringatan restok (>= 0)"
+        TEXT image_url "URL gambar produk obat"
+        TIMESTAMPTZ created_at "Waktu pembuatan record"
+        TIMESTAMPTZ updated_at "Waktu pembaruan data obat"
+    }
+
+    transactions {
+        UUID id PK "Primary Key (uuid_generate_v4)"
+        VARCHAR code UK "Nomor invoice (contoh: TRX-20261026-001)"
+        TIMESTAMPTZ date_time "Waktu resmi transaksi penjualan"
+        VARCHAR customer "Nama pembeli / Pelanggan Umum"
+        VARCHAR cashier_name "Nama kasir saat checkout (snapshot)"
+        UUID cashier_id FK "References profiles(id) ON DELETE SET NULL"
+        VARCHAR payment_method "Tunai, QRIS, Transfer, Debit"
+        NUMERIC subtotal "Total kotor sebelum diskon (>= 0)"
+        NUMERIC discount "Nominal diskon penjualan (>= 0)"
+        NUMERIC total "Total tagihan bersih (>= 0)"
+        NUMERIC amount_tendered "Uang yang diserahkan pelanggan (>= total)"
+        NUMERIC change "Uang kembalian kasir (>= 0)"
+        TEXT notes "Catatan transaksi"
+        TIMESTAMPTZ created_at "Audit timestamp pembuatan"
+    }
+
+    transaction_items {
+        UUID id PK "Primary Key (uuid_generate_v4)"
+        UUID transaction_id FK "References transactions(id) ON DELETE CASCADE"
+        UUID medicine_id FK "References medicines(id) ON DELETE SET NULL"
+        VARCHAR medicine_code "Kode obat saat transaksi (snapshot)"
+        VARCHAR medicine_name "Nama obat saat transaksi (snapshot)"
+        VARCHAR unit "Satuan jual obat saat transaksi (snapshot)"
+        NUMERIC price "Harga satuan saat transaksi (snapshot)"
+        INTEGER qty "Kuantitas pembelian (> 0)"
+        NUMERIC subtotal "Total harga item (qty * price)"
+        TIMESTAMPTZ created_at "Timestamp pencatatan item"
+    }
+
+    stock_movements {
+        UUID id PK "Primary Key (uuid_generate_v4)"
+        UUID medicine_id FK "References medicines(id) ON DELETE CASCADE"
+        VARCHAR medicine_code "Kode obat saat mutasi (snapshot)"
+        VARCHAR medicine_name "Nama obat saat mutasi (snapshot)"
+        TIMESTAMPTZ date "Waktu kejadian pergerakan stok"
+        VARCHAR change_type "in (restok) | out (rusak/expired) | adjustment (opname)"
+        INTEGER delta "Jumlah perubahan stok (+ atau -)"
+        INTEGER final_stock "Sisa stok akhir obat setelah mutasi (>= 0)"
+        TEXT reason "Keterangan alasan mutasi stok"
+        VARCHAR operator_name "Nama staf operator (snapshot)"
+        UUID operator_id FK "References profiles(id) ON DELETE SET NULL"
+        TIMESTAMPTZ created_at "Audit timestamp pergerakan stok"
+    }
+
+    pharmacy_settings {
+        INTEGER id PK "Singleton ID (CHECK id = 1)"
+        VARCHAR pharmacy_name "Nama resmi apotek"
+        VARCHAR tagline "Slogan / motto apotek"
+        TEXT address "Alamat fisik apotek"
+        VARCHAR phone "Nomor telepon / kontak apotek"
+        TEXT receipt_footer "Pesan pada bagian bawah struk belanja"
+        TIMESTAMPTZ updated_at "Waktu pembaruan konfigurasi"
+    }
