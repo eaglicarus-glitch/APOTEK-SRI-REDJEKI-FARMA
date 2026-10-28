@@ -129,14 +129,24 @@ export default function DashboardView() {
           <div className="stock-alert-list">
             {lowStockItems.map((med) => {
               const isVeryLow = med.stock <= 5;
+              const productMatch = products.find((p) => p.id === med.id || p.name.toLowerCase() === med.name.toLowerCase());
+              const medImage = med.image || productMatch?.image;
+
               return (
                 <div key={med.id} className="stock-alert-item">
                   <div className="stock-alert-icon">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#64748B" strokeWidth="1.8">
-                      <rect x="3" y="3" width="18" height="18" rx="4" />
-                      <path d="m8 12 8 0" />
-                      <circle cx="12" cy="12" r="2" fill="#0066CC" />
-                    </svg>
+                    {medImage ? (
+                      <img
+                        src={medImage}
+                        alt={med.name}
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                      />
+                    ) : (
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0066CC" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z" />
+                        <path d="m8.5 8.5 7 7" />
+                      </svg>
+                    )}
                   </div>
                   <div className="stock-alert-info">
                     <div className="stock-med-name">{med.name}</div>

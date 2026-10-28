@@ -247,15 +247,17 @@ export default function PosView() {
                         </div>
                       )}
                     </div>
-                    <div className="cart-item-info">
-                      <div className="cart-item-name" title={item.name}>{item.name}</div>
-                      <div className="cart-item-math">
-                        <span className="cart-item-qty-actions">
+                    <div className="cart-item-content">
+                      <div className="cart-item-top-row">
+                        <div className="cart-item-name" title={item.name}>{item.name}</div>
+                      </div>
+                      <div className="cart-item-bottom-row">
+                        <div className="cart-item-qty-actions">
                           <button
                             type="button"
                             onClick={() => updateCartQty(item.id, -1)}
-                            title="Kurang"
-                            aria-label="Kurangi kuantitas"
+                            title="Kurangi kuantitas"
+                            aria-label="Kurang"
                           >
                             -
                           </button>
@@ -264,40 +266,39 @@ export default function PosView() {
                             value={item.qty}
                             min="1"
                             onChange={(e) => setCartQty(item.id, e.target.value)}
-                            aria-label="Jumlah pesanan"
+                            aria-label="Jumlah"
                           />
                           <button
                             type="button"
                             onClick={() => updateCartQty(item.id, 1)}
-                            title="Tambah"
-                            aria-label="Tambah kuantitas"
+                            title="Tambah kuantitas"
+                            aria-label="Tambah"
                           >
                             +
                           </button>
-                        </span>
+                        </div>
+                        <div className="cart-item-actions-right">
+                          <span className="cart-item-price-val">{formatRupiah(item.subtotal)}</span>
+                          <button
+                            type="button"
+                            className="btn-remove-item"
+                            onClick={() => removeFromCart(item.id)}
+                            title="Hapus pesanan"
+                            aria-label="Hapus pesanan"
+                          >
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <polyline points="3 6 5 6 21 6" />
+                              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                              <line x1="10" y1="11" x2="10" y2="17" />
+                              <line x1="14" y1="11" x2="14" y2="17" />
+                            </svg>
+                          </button>
+                        </div>
                       </div>
-                    </div>
-                    <div className="cart-item-subtotal">
-                      <span className="cart-item-price-val">{formatRupiah(item.subtotal)}</span>
-                      <button
-                        type="button"
-                        className="btn-remove-item"
-                        onClick={() => removeFromCart(item.id)}
-                        title="Hapus pesanan"
-                        aria-label="Hapus pesanan"
-                      >
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <polyline points="3 6 5 6 21 6" />
-                          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                          <line x1="10" y1="11" x2="10" y2="17" />
-                          <line x1="14" y1="11" x2="14" y2="17" />
-                        </svg>
-                      </button>
                     </div>
                   </div>
                 );
-              })
-            )}
+              })            )}
           </div>
 
           {/* Ringkasan & Tombol Simpan / Bayar */}
