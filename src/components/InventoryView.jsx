@@ -33,13 +33,30 @@ export default function InventoryView() {
   // Detail Modal State
   const [detailMedicine, setDetailMedicine] = useState(null);
 
-  const categories = ['Semua', 'Tablet', 'Kapsul', 'Sirup', 'Salep', 'Lainnya'];
+  // Kategori dinamis sesuai database dan standar apotek
+  const categories = React.useMemo(() => {
+    const standardCats = [
+      'Obat Bebas',
+      'Obat Bebas Terbatas',
+      'Obat Keras',
+      'Obat Luar',
+      'Vitamin & Suplemen',
+      'Alat Kesehatan',
+      'Herbal & Jamu'
+    ];
+    const productCats = products
+      .map((p) => p.category)
+      .filter((c) => c && typeof c === 'string' && c.trim() !== '');
+
+    const set = new Set(['Semua', ...standardCats, ...productCats]);
+    return Array.from(set);
+  }, [products]);
 
   const filtered = products.filter((p) => {
     const matchCat =
       selectedCategory === 'Semua' ||
       (selectedCategory === 'Lainnya'
-        ? !['Tablet', 'Kapsul', 'Sirup', 'Salep'].includes(p.category)
+        ? !categories.filter((c) => c !== 'Semua' && c !== 'Lainnya').includes(p.category)
         : p.category === selectedCategory);
 
     const q = searchQuery.toLowerCase().trim();
