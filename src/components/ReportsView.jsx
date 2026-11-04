@@ -1,11 +1,9 @@
 import React, { useState, useMemo } from 'react';
 import { usePharmacy } from '../context/PharmacyContext';
-import { useToast } from '../context/ToastContext';
-import { formatRupiah, formatDateTime, getLocalDateString } from '../lib/constants';
+import { formatRupiah, getLocalDateString } from '../lib/constants';
 
 export default function ReportsView() {
   const { transactions } = usePharmacy();
-  const { showToast } = useToast();
   const [period, setPeriod] = useState('today'); // 'today' | 'week' | 'month' | 'all'
 
   const todayStr = useMemo(() => getLocalDateString(new Date()), []);
@@ -117,62 +115,12 @@ export default function ReportsView() {
     return days;
   }, [transactions]);
 
-  // Ekspor CSV
-  const handleExportCSV = () => {
-    if (filteredTx.length === 0) {
-      showToast('Tidak ada data transaksi untuk diekspor!', 'warning');
-      return;
-    }
-
-    const headers = ['Kode Transaksi', 'Tanggal', 'Pelanggan', 'Metode Pembayaran', 'Total (Rp)', 'Kasir', 'Item Detail'];
-    const rows = filteredTx.map((tx) => {
-      const itemsStr = tx.items ? tx.items.map((it) => `${it.name} x${it.qty}`).join('; ') : '';
-      return [
-        `"${tx.code}"`,
-        `"${formatDateTime(tx.dateTime)}"`,
-        `"${(tx.customer || '').replace(/"/g, '""')}"`,
-        `"${tx.paymentMethod}"`,
-        tx.total,
-        `"${tx.cashier || ''}"`,
-        `"${itemsStr.replace(/"/g, '""')}"`
-      ].join(',');
-    });
-
-    const csvContent = 'data:text/csv;charset=utf-8,\uFEFF' + [headers.join(','), ...rows].join('\n');
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement('a');
-    link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `Laporan_Apotek_Sri_Redjeki_${period}_${todayStr}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-
-    showToast('Laporan CSV berhasil diunduh.', 'success');
-  };
-
   return (
     <section id="view-reports" className="view-panel">
       {/* Header Halaman */}
       <div className="content-header-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
         <div>
           <h1 className="content-title">Laporan Penjualan &amp; Keuangan</h1>
-        </div>
-        <div style={{ display: 'flex', gap: '8px' }}>
-          <button type="button" className="btn btn-secondary" onClick={handleExportCSV}>
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-              <polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" />
-            </svg>
-            <span>Ekspor CSV</span>
-          </button>
-          <button type="button" className="btn btn-primary" onClick={() => window.print()}>
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <polyline points="6 9 6 2 18 2 18 9" />
-              <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
-              <rect x="6" y="14" width="12" height="8" />
-            </svg>
-            <span>Cetak Laporan</span>
-          </button>
         </div>
       </div>
 

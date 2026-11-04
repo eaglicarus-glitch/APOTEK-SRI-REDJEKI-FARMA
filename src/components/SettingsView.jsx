@@ -39,15 +39,15 @@ export default function SettingsView() {
 
   return (
     <section id="view-settings" className="view-panel">
-      {/* Header Halaman */}
-      <div className="content-header-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+      {/* Header Halaman - Ditengahkan */}
+      <div className="content-header-row" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: '20px', textAlign: 'center' }}>
         <div>
           <h1 className="content-title">Pengaturan Sistem Apotek</h1>
         </div>
       </div>
 
-      {/* Profil Apotek Card */}
-      <div style={{ maxWidth: '640px' }}>
+      {/* Profil Apotek Card - Ditengahkan */}
+      <div style={{ maxWidth: '640px', margin: '0 auto' }}>
         <div className="dashboard-section-card">
           <div className="card-header-clean">
             <h3 className="section-card-title">Profil &amp; Identitas Apotek</h3>

@@ -540,16 +540,7 @@ export default function InventoryView() {
                   )}
                 </div>
 
-                <div className="form-group">
-                  <label>Catatan / Alasan</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    placeholder="Contoh: Faktur No 442 atau Kadaluarsa"
-                    value={notes}
-                    onChange={(e) => setNotes(e.target.value)}
-                  />
-                </div>
+
               </div>
 
               <div className="modal-footer">
