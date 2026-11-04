@@ -182,18 +182,15 @@ export default function PosView() {
                     {p.image ? (
                       <img src={p.image} alt={p.name} />
                     ) : (
-                      <div className="product-thumb-placeholder">
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#64748B" strokeWidth="1.8">
-                          <rect x="3" y="3" width="18" height="18" rx="4" />
-                          <circle cx="8.5" cy="8.5" r="1.5" />
-                          <path d="m21 15-5-5L5 21" />
-                        </svg>
-                      </div>
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0066CC" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z" />
+                        <path d="m8.5 8.5 7 7" />
+                      </svg>
                     )}
                   </div>
                   <div className="product-row-info">
                     <div className="product-row-name">{p.name}</div>
-                    <div className="product-row-sub">{p.category} - {p.unit}</div>
+                    <div className="product-row-sub">{p.stock} {p.unit || 'Sachet'}</div>
                   </div>
                   <div className="product-row-price">
                     {formatRupiah(p.price)}
