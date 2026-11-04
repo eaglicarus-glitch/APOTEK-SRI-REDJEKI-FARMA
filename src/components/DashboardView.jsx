@@ -10,9 +10,16 @@ export default function DashboardView() {
   const isCashier = currentUser?.role === 'Kasir';
   const todayStr = useMemo(() => getLocalDateString(new Date()), []);
 
-  // Filter transaksi hari ini
+  // Filter transaksi hari ini (konversi akurat waktu lokal/WIB dari UTC database)
   const todayTx = useMemo(() => {
-    return transactions.filter((tx) => tx.dateTime && tx.dateTime.startsWith(todayStr));
+    return transactions.filter((tx) => {
+      if (!tx.dateTime) return false;
+      try {
+        return getLocalDateString(new Date(tx.dateTime)) === todayStr;
+      } catch {
+        return tx.dateTime.startsWith(todayStr);
+      }
+    });
   }, [transactions, todayStr]);
 
   const totalSalesToday = useMemo(() => {

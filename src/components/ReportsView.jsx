@@ -10,19 +10,41 @@ export default function ReportsView() {
 
   const todayStr = useMemo(() => getLocalDateString(new Date()), []);
 
-  // Filter transaksi berdasarkan periode
+  // Filter transaksi berdasarkan periode (konversi akurat waktu lokal/WIB dari UTC database)
   const filteredTx = useMemo(() => {
     const now = new Date();
     if (period === 'today') {
-      return transactions.filter((tx) => tx.dateTime && tx.dateTime.startsWith(todayStr));
+      return transactions.filter((tx) => {
+        if (!tx.dateTime) return false;
+        try {
+          return getLocalDateString(new Date(tx.dateTime)) === todayStr;
+        } catch {
+          return tx.dateTime.startsWith(todayStr);
+        }
+      });
     } else if (period === 'week') {
       const past7 = new Date();
       past7.setDate(now.getDate() - 7);
-      const past7Str = getLocalDateString(past7);
-      return transactions.filter((tx) => tx.dateTime && tx.dateTime >= `${past7Str}T00:00:00`);
+      return transactions.filter((tx) => {
+        if (!tx.dateTime) return false;
+        try {
+          return new Date(tx.dateTime) >= past7;
+        } catch {
+          return true;
+        }
+      });
     } else if (period === 'month') {
-      const monthPrefix = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-      return transactions.filter((tx) => tx.dateTime && tx.dateTime.startsWith(monthPrefix));
+      const curYear = now.getFullYear();
+      const curMonth = now.getMonth();
+      return transactions.filter((tx) => {
+        if (!tx.dateTime) return false;
+        try {
+          const d = new Date(tx.dateTime);
+          return d.getFullYear() === curYear && d.getMonth() === curMonth;
+        } catch {
+          return true;
+        }
+      });
     }
     return transactions;
   }, [transactions, period, todayStr]);
@@ -81,7 +103,14 @@ export default function ReportsView() {
       const dStr = getLocalDateString(d);
       const dayLabel = daysIndo[d.getDay()];
       const daySales = transactions
-        .filter((tx) => tx.dateTime && tx.dateTime.startsWith(dStr))
+        .filter((tx) => {
+          if (!tx.dateTime) return false;
+          try {
+            return getLocalDateString(new Date(tx.dateTime)) === dStr;
+          } catch {
+            return tx.dateTime.startsWith(dStr);
+          }
+        })
         .reduce((sum, tx) => sum + (Number(tx.total) || 0), 0);
       days.push({ date: dStr, label: dayLabel, sales: daySales });
     }
