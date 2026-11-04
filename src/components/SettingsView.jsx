@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { usePharmacy } from '../context/PharmacyContext';
 import { useToast } from '../context/ToastContext';
 
@@ -7,11 +7,22 @@ export default function SettingsView() {
   const { showToast } = useToast();
 
   // Settings Form State
-  const [pharmacyName, setPharmacyName] = useState(settings.pharmacyName || 'Apotek Sri Redjeki Farma');
-  const [tagline, setTagline] = useState(settings.tagline || 'Sehat Bersama, Hidup Lebih Baik');
-  const [address, setAddress] = useState(settings.address || 'Jl. Raya No. 123, Kec. Sidoarjo');
-  const [phone, setPhone] = useState(settings.phone || '0812-3456-7890');
-  const [receiptFooter, setReceiptFooter] = useState(settings.receiptFooter || 'Terima Kasih, Semoga Sehat Selalu');
+  const [pharmacyName, setPharmacyName] = useState(settings?.pharmacyName || 'Apotek Sri Redjeki Farma');
+  const [tagline, setTagline] = useState(settings?.tagline || 'Sehat Bersama, Hidup Lebih Baik');
+  const [address, setAddress] = useState(settings?.address || 'Jl. Raya No. 123, Kec. Sidoarjo');
+  const [phone, setPhone] = useState(settings?.phone || '0812-3456-7890');
+  const [receiptFooter, setReceiptFooter] = useState(settings?.receiptFooter || 'Terima Kasih, Semoga Sehat Selalu');
+
+  // Synchronize with loaded settings from database
+  useEffect(() => {
+    if (settings) {
+      if (settings.pharmacyName) setPharmacyName(settings.pharmacyName);
+      if (settings.tagline) setTagline(settings.tagline);
+      if (settings.address) setAddress(settings.address);
+      if (settings.phone) setPhone(settings.phone);
+      if (settings.receiptFooter) setReceiptFooter(settings.receiptFooter);
+    }
+  }, [settings]);
 
   const handleSavePharmacy = async (e) => {
     e.preventDefault();
@@ -47,14 +58,14 @@ export default function SettingsView() {
       </div>
 
       {/* Profil Apotek Card - Ditengahkan */}
-      <div style={{ maxWidth: '640px', margin: '0 auto' }}>
-        <div className="dashboard-section-card">
-          <div className="card-header-clean">
+      <div style={{ maxWidth: '680px', margin: '0 auto', width: '100%' }}>
+        <div className="dashboard-section-card" style={{ padding: '24px 28px' }}>
+          <div className="card-header-clean" style={{ marginBottom: '16px' }}>
             <h3 className="section-card-title">Profil &amp; Identitas Apotek</h3>
           </div>
 
           <form onSubmit={handleSavePharmacy} noValidate>
-            <div className="form-group">
+            <div className="form-group" style={{ marginBottom: '16px' }}>
               <label htmlFor="settings-pharmacy-name">Nama Apotek *</label>
               <input
                 type="text"
@@ -66,7 +77,7 @@ export default function SettingsView() {
               />
             </div>
 
-            <div className="form-group">
+            <div className="form-group" style={{ marginBottom: '16px' }}>
               <label htmlFor="settings-tagline">Tagline / Slogan</label>
               <input
                 type="text"
@@ -77,19 +88,19 @@ export default function SettingsView() {
               />
             </div>
 
-            <div className="form-group">
+            <div className="form-group" style={{ marginBottom: '16px' }}>
               <label htmlFor="settings-address">Alamat Fisik Apotek *</label>
               <textarea
                 id="settings-address"
                 className="form-control"
-                rows="2"
+                rows="3"
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
                 required
               />
             </div>
 
-            <div className="form-group">
+            <div className="form-group" style={{ marginBottom: '16px' }}>
               <label htmlFor="settings-phone">No. Telepon / WhatsApp *</label>
               <input
                 type="text"
@@ -101,12 +112,12 @@ export default function SettingsView() {
               />
             </div>
 
-            <div className="form-group">
+            <div className="form-group" style={{ marginBottom: '20px' }}>
               <label htmlFor="settings-receipt-footer">Teks Footer Nota Penjualan</label>
               <textarea
                 id="settings-receipt-footer"
                 className="form-control"
-                rows="2"
+                rows="3"
                 value={receiptFooter}
                 onChange={(e) => setReceiptFooter(e.target.value)}
               />
