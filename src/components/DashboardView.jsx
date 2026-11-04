@@ -16,40 +16,27 @@ export default function DashboardView() {
   }, [transactions, todayStr]);
 
   const totalSalesToday = useMemo(() => {
-    const sum = todayTx.reduce((acc, tx) => acc + (Number(tx.total) || 0), 0);
-    return sum > 0 ? sum : 1245000; // Demo fallback if 0
+    return todayTx.reduce((acc, tx) => acc + (Number(tx.total) || 0), 0);
   }, [todayTx]);
 
-  const txCountToday = todayTx.length > 0 ? todayTx.length : 18;
+  const txCountToday = todayTx.length;
 
   const totalItemsSold = useMemo(() => {
-    const items = todayTx.reduce((sum, tx) => {
-      return sum + (tx.items?.reduce((itSum, it) => itSum + Number(it.qty || 1), 0) || 1);
+    return todayTx.reduce((sum, tx) => {
+      return sum + (tx.items?.reduce((itSum, it) => itSum + Number(it.qty || 1), 0) || 0);
     }, 0);
-    return items > 0 ? items : 32;
   }, [todayTx]);
 
-  // Stok Menipis (sample fallback items if empty)
+  // Stok Menipis (Data riil dari database/state)
   const lowStockItems = useMemo(() => {
-    const filtered = products.filter((p) => Number(p.stock) <= (p.minStock || 10));
-    if (filtered.length > 0) return filtered.slice(0, 5);
-    return [
-      { id: 'sample-1', name: 'Paracetamol 500mg', stock: 5, unit: 'tablet', status: 'Stok rendah' },
-      { id: 'sample-2', name: 'Amoxicillin 500mg', stock: 8, unit: 'kapsul', status: 'Stok rendah' },
-      { id: 'sample-3', name: 'Vitamin C 1000mg', stock: 12, unit: 'tablet', status: 'Stok hampir habis' }
-    ];
+    return products
+      .filter((p) => Number(p.stock) <= (p.minStock || 10))
+      .slice(0, 5);
   }, [products]);
 
-  // Transaksi Terbaru
+  // Transaksi Terbaru (Data riil dari database/state)
   const latestTx = useMemo(() => {
-    if (transactions.length > 0) return transactions.slice(0, 5);
-    return [
-      { id: 'tx-1', code: 'TRX-20250930-001', total: 85000, time: '10:12' },
-      { id: 'tx-2', code: 'TRX-20250930-002', total: 120000, time: '09:45' },
-      { id: 'tx-3', code: 'TRX-20250930-003', total: 65000, time: '09:30' },
-      { id: 'tx-4', code: 'TRX-20250930-004', total: 150000, time: '09:15' },
-      { id: 'tx-5', code: 'TRX-20250930-005', total: 42000, time: '08:50' }
-    ];
+    return transactions.slice(0, 5);
   }, [transactions]);
 
   const formatTxTime = (dateTimeStr) => {
@@ -127,37 +114,47 @@ export default function DashboardView() {
           </div>
 
           <div className="stock-alert-list">
-            {lowStockItems.map((med) => {
-              const isVeryLow = med.stock <= 5;
-              const productMatch = products.find((p) => p.id === med.id || p.name.toLowerCase() === med.name.toLowerCase());
-              const medImage = med.image || productMatch?.image;
+            {lowStockItems.length === 0 ? (
+              <div className="dashboard-empty-card">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#10B981" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                  <polyline points="22 4 12 14.01 9 11.01" />
+                </svg>
+                <p>Seluruh stok obat dalam kondisi aman</p>
+              </div>
+            ) : (
+              lowStockItems.map((med) => {
+                const isVeryLow = med.stock <= 5;
+                const productMatch = products.find((p) => p.id === med.id || p.name.toLowerCase() === med.name.toLowerCase());
+                const medImage = med.image || productMatch?.image;
 
-              return (
-                <div key={med.id} className="stock-alert-item">
-                  <div className="stock-alert-icon">
-                    {medImage ? (
-                      <img
-                        src={medImage}
-                        alt={med.name}
-                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                      />
-                    ) : (
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0066CC" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z" />
-                        <path d="m8.5 8.5 7 7" />
-                      </svg>
-                    )}
+                return (
+                  <div key={med.id} className="stock-alert-item">
+                    <div className="stock-alert-icon">
+                      {medImage ? (
+                        <img
+                          src={medImage}
+                          alt={med.name}
+                          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        />
+                      ) : (
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0066CC" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z" />
+                          <path d="m8.5 8.5 7 7" />
+                        </svg>
+                      )}
+                    </div>
+                    <div className="stock-alert-info">
+                      <div className="stock-med-name">{med.name}</div>
+                      <div className="stock-med-qty">{med.stock} {med.unit || 'tablet'}</div>
+                    </div>
+                    <span className={`badge-pill ${isVeryLow ? 'badge-pill-danger' : 'badge-pill-warning'}`}>
+                      {med.status || (isVeryLow ? 'Stok rendah' : 'Stok hampir habis')}
+                    </span>
                   </div>
-                  <div className="stock-alert-info">
-                    <div className="stock-med-name">{med.name}</div>
-                    <div className="stock-med-qty">{med.stock} {med.unit || 'tablet'}</div>
-                  </div>
-                  <span className={`badge-pill ${isVeryLow ? 'badge-pill-danger' : 'badge-pill-warning'}`}>
-                    {med.status || (isVeryLow ? 'Stok rendah' : 'Stok hampir habis')}
-                  </span>
-                </div>
-              );
-            })}
+                );
+              })
+            )}
           </div>
         </div>
 
@@ -175,13 +172,23 @@ export default function DashboardView() {
           </div>
 
           <div className="recent-tx-list">
-            {latestTx.map((tx) => (
-              <div key={tx.id || tx.code} className="recent-tx-item">
-                <div className="recent-tx-code">{tx.code}</div>
-                <div className="recent-tx-total">{formatRupiah(tx.total)}</div>
-                <div className="recent-tx-time">{tx.time || formatTxTime(tx.dateTime)}</div>
+            {latestTx.length === 0 ? (
+              <div className="dashboard-empty-card">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="10" />
+                  <polyline points="12 6 12 12 14 14" />
+                </svg>
+                <p>Belum ada transaksi tercatat</p>
               </div>
-            ))}
+            ) : (
+              latestTx.map((tx) => (
+                <div key={tx.id || tx.code} className="recent-tx-item">
+                  <div className="recent-tx-code">{tx.code}</div>
+                  <div className="recent-tx-total">{formatRupiah(tx.total)}</div>
+                  <div className="recent-tx-time">{tx.time || formatTxTime(tx.dateTime)}</div>
+                </div>
+              ))
+            )}
           </div>
         </div>
       </div>
