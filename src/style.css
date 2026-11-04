@@ -2243,6 +2243,81 @@ textarea.form-control {
   }
 }
 
+@media (max-width: 768px) {
+  .app-content {
+    padding: 16px 14px 24px;
+  }
+  .header-right .datetime-indicator {
+    display: none;
+  }
+  .header-left {
+    max-width: 100%;
+  }
+  .dashboard-stats-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .dashboard-two-columns {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .history-filter-bar-clean {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+  .filter-input-group {
+    width: 100%;
+  }
+  .filter-actions-group .btn {
+    width: 100%;
+  }
+  .modal-dialog {
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+  }
+  .modal-body {
+    overflow-y: auto;
+  }
+}
+
+@media (max-width: 576px) {
+  .app-header {
+    padding: 0 12px;
+  }
+  .header-left {
+    max-width: 100%;
+    gap: 8px;
+  }
+  .header-search input {
+    font-size: 11px;
+    padding: 6px 10px 6px 30px;
+  }
+  .app-content {
+    padding: 12px 10px 20px;
+  }
+  .content-title {
+    font-size: 18px;
+  }
+  .dashboard-section-card {
+    padding: 16px 14px;
+  }
+  .category-pill {
+    padding: 5px 12px;
+    font-size: 11px;
+  }
+  .pos-cart-panel {
+    padding: 14px 12px;
+  }
+  .modal-backdrop {
+    padding: 8px;
+  }
+  .table-pagination-footer {
+    justify-content: center;
+  }
+}
+
 .dashboard-empty-card {
   display: flex;
   flex-direction: column;
