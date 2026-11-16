@@ -76,7 +76,7 @@ export const INITIAL_PRODUCTS = [
     price: 35000,
     stock: 30,
     minStock: 10,
-    image: 'https://images.unsplash.com/photo-1550572017-edd951aa8f72?w=400&auto=format&fit=crop&q=60'
+    image: null
   },
   {
     id: 'MED-004',

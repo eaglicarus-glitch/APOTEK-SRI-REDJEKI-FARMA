@@ -4,6 +4,17 @@ import { STORAGE_KEY, DEFAULT_SETTINGS, INITIAL_PRODUCTS, getLocalDateString, no
 
 const PharmacyContext = createContext(null);
 
+const sanitizeProductImage = (name, img) => {
+  if (!img || typeof img !== 'string') return null;
+  const trimmed = img.trim();
+  if (!trimmed) return null;
+  // Jika Vitamin C memiliki link gambar unsplash yang rusak/dead
+  if (name && name.toLowerCase().includes('vitamin c') && trimmed.includes('photo-1550572017-edd951aa8f72')) {
+    return null;
+  }
+  return trimmed;
+};
+
 export function PharmacyProvider({ children }) {
   const [products, setProducts] = useState(INITIAL_PRODUCTS);
   const [transactions, setTransactions] = useState([]);
@@ -24,7 +35,12 @@ export function PharmacyProvider({ children }) {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) {
         const parsed = JSON.parse(raw);
-        if (parsed.products && Array.isArray(parsed.products)) setProducts(parsed.products);
+        if (parsed.products && Array.isArray(parsed.products)) {
+          setProducts(parsed.products.map((p) => ({
+            ...p,
+            image: sanitizeProductImage(p.name, p.image)
+          })));
+        }
         if (parsed.transactions && Array.isArray(parsed.transactions)) setTransactions(parsed.transactions);
         if (parsed.stockMovements && Array.isArray(parsed.stockMovements)) setStockMovements(parsed.stockMovements);
         if (parsed.settings) setSettings((prev) => ({ ...prev, ...parsed.settings }));
@@ -55,9 +71,18 @@ export function PharmacyProvider({ children }) {
             price: Number(m.price),
             stock: Number(m.stock),
             minStock: Number(m.min_stock || 10),
-            image: m.image_url || ''
+            image: sanitizeProductImage(m.name, m.image_url)
           }));
           setProducts(mappedMeds);
+
+          // Bersihkan broken unsplash link untuk Vitamin C di Supabase secara background jika masih ada
+          client
+            .from('medicines')
+            .update({ image_url: null })
+            .ilike('name', '%vitamin c%')
+            .ilike('image_url', '%photo-1550572017%')
+            .then(() => {})
+            .catch(() => {});
         }
 
         if (trxRes.data && trxRes.data.length > 0) {

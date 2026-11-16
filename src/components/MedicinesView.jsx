@@ -75,7 +75,8 @@ export default function MedicinesView() {
     setPrice(String(p.price));
     setStock(String(p.stock));
     setDescription(p.description || '');
-    setImageBase64(p.image || '');
+    const cleanImg = (p.image && !p.image.includes('photo-1550572017-edd951aa8f72')) ? p.image : '';
+    setImageBase64(cleanImg);
     setIsModalOpen(true);
   };
 
@@ -410,9 +411,34 @@ export default function MedicinesView() {
                           <img
                             src={imageBase64}
                             alt="Preview"
+                            onError={(e) => {
+                              e.target.style.display = 'none';
+                            }}
                             style={{ maxWidth: '140px', maxHeight: '140px', objectFit: 'contain', borderRadius: '6px', marginBottom: '8px' }}
                           />
-                          <p style={{ fontSize: '11px', color: 'var(--primary-blue)' }}>Klik untuk ganti gambar</p>
+                          <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', alignItems: 'center', marginTop: '4px' }}>
+                            <span style={{ fontSize: '11px', color: 'var(--primary-blue)' }}>Klik untuk ganti gambar</span>
+                            <span style={{ fontSize: '11px', color: '#94a3b8' }}>•</span>
+                            <button
+                              type="button"
+                              onClick={(ev) => {
+                                ev.preventDefault();
+                                ev.stopPropagation();
+                                setImageBase64('');
+                              }}
+                              style={{
+                                background: 'none',
+                                border: 'none',
+                                padding: 0,
+                                fontSize: '11px',
+                                color: 'var(--danger)',
+                                cursor: 'pointer',
+                                fontWeight: '500'
+                              }}
+                            >
+                              Hapus Foto (Gunakan Default)
+                            </button>
+                          </div>
                         </div>
                       ) : (
                         <div className="dropzone-content">
@@ -422,7 +448,10 @@ export default function MedicinesView() {
                             <polyline points="21 15 16 10 5 21" />
                           </svg>
                           <span className="dropzone-text">Upload Gambar Obat</span>
-                          <span className="dropzone-sub">Klik untuk mengunggah atau drag &amp; drop</span>
+                          <span className="dropzone-sub">Klik untuk mengunggah atau drag &amp; drop (Opsional)</span>
+                          <span style={{ fontSize: '11px', color: 'var(--muted-text)', marginTop: '4px' }}>
+                            Jika dikosongkan, otomatis menggunakan ikon profil default
+                          </span>
                         </div>
                       )}
                     </label>

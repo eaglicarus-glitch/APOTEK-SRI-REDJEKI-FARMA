@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { usePharmacy } from '../context/PharmacyContext';
 import { useAuth } from '../context/AuthContext';
 import { formatRupiah, getLocalDateString } from '../lib/constants';
+import MedicineThumbnail from './MedicineThumbnail';
 
 export default function DashboardView() {
   const { products, transactions, setActiveView } = usePharmacy();
@@ -138,18 +139,7 @@ export default function DashboardView() {
                 return (
                   <div key={med.id} className="stock-alert-item">
                     <div className="stock-alert-icon">
-                      {medImage ? (
-                        <img
-                          src={medImage}
-                          alt={med.name}
-                          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                        />
-                      ) : (
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0066CC" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z" />
-                          <path d="m8.5 8.5 7 7" />
-                        </svg>
-                      )}
+                      <MedicineThumbnail src={medImage} alt={med.name} size={18} />
                     </div>
                     <div className="stock-alert-info">
                       <div className="stock-med-name">{med.name}</div>

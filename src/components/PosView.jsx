@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { formatRupiah } from '../lib/constants';
 import ReceiptModal from './ReceiptModal';
+import MedicineThumbnail from './MedicineThumbnail';
 
 export default function PosView() {
   const {
@@ -179,14 +180,7 @@ export default function PosView() {
                   onClick={() => p.stock > 0 && handleAddToCart(p)}
                 >
                   <div className="product-row-thumb">
-                    {p.image ? (
-                      <img src={p.image} alt={p.name} />
-                    ) : (
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0066CC" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z" />
-                        <path d="m8.5 8.5 7 7" />
-                      </svg>
-                    )}
+                    <MedicineThumbnail src={p.image} alt={p.name} size={18} />
                   </div>
                   <div className="product-row-info">
                     <div className="product-row-name">{p.name}</div>
@@ -233,16 +227,7 @@ export default function PosView() {
                 return (
                   <div key={item.id} className="pos-cart-item-row">
                     <div className="cart-item-thumb">
-                      {itemImage ? (
-                        <img src={itemImage} alt={item.name} />
-                      ) : (
-                        <div className="cart-thumb-box">
-                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0066CC" strokeWidth="1.8">
-                            <path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z" />
-                            <path d="m8.5 8.5 7 7" />
-                          </svg>
-                        </div>
-                      )}
+                      <MedicineThumbnail src={itemImage} alt={item.name} size={18} />
                     </div>
                     <div className="cart-item-content">
                       <div className="cart-item-top-row">
