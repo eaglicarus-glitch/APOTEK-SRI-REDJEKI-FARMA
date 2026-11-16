@@ -48,7 +48,6 @@ export default function LoginView() {
             <span className="brand-kicker">APOTEK</span>
             <h1 className="brand-main-title">SRI REDJEKI FARMA</h1>
             <div className="brand-tagline-wrap">
-              <span className="tagline-bullet" />
               <p className="login-brand-tagline">Sehat Bersama, Hidup Lebih Baik</p>
             </div>
           </div>

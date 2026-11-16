@@ -41,3 +41,4 @@ export default function MedicineThumbnail({ src, alt, size = 18, className = '' 
     />
   );
 }
+
